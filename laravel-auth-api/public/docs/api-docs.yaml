@@ -1,0 +1,234 @@
+openapi: 3.0.0
+info:
+  title: Laravel Auth API
+  description: API documentation for Laravel authentication system with roles, permissions, and groups
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:8000/api
+    description: Local development server
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        email:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    LoginRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          format: password
+
+    RegisterRequest:
+      type: object
+      required:
+        - name
+        - email
+        - password
+        - password_confirmation
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          format: password
+        password_confirmation:
+          type: string
+          format: password
+
+paths:
+  /register:
+    post:
+      tags:
+        - Authentication
+      summary: Register a new user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+      responses:
+        201:
+          description: User registered successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  user:
+                    $ref: '#/components/schemas/User'
+                  access_token:
+                    type: string
+        422:
+          description: Validation error
+
+  /login:
+    post:
+      tags:
+        - Authentication
+      summary: Login user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        200:
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  user:
+                    $ref: '#/components/schemas/User'
+                  access_token:
+                    type: string
+        401:
+          description: Invalid credentials
+
+  /logout:
+    post:
+      tags:
+        - Authentication
+      summary: Logout user
+      security:
+        - bearerAuth: []
+      responses:
+        200:
+          description: Logout successful
+        401:
+          description: Unauthenticated
+
+  /user:
+    get:
+      tags:
+        - User
+      summary: Get authenticated user details
+      security:
+        - bearerAuth: []
+      responses:
+        200:
+          description: User details retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user:
+                    $ref: '#/components/schemas/User'
+                  roles:
+                    type: array
+                    items:
+                      type: object
+                  permissions:
+                    type: array
+                    items:
+                      type: object
+                  groups:
+                    type: array
+                    items:
+                      type: object
+        401:
+          description: Unauthenticated
+
+  /users:
+    get:
+      tags:
+        - Users
+      summary: Get all users
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+          description: Page number for pagination
+      responses:
+        200:
+          description: List of users retrieved successfully
+        403:
+          description: Unauthorized
+        401:
+          description: Unauthenticated
+
+  /roles:
+    get:
+      tags:
+        - Roles
+      summary: Get all roles
+      security:
+        - bearerAuth: []
+      responses:
+        200:
+          description: List of roles retrieved successfully
+        403:
+          description: Unauthorized
+        401:
+          description: Unauthenticated
+
+  /permissions:
+    get:
+      tags:
+        - Permissions
+      summary: Get all permissions
+      security:
+        - bearerAuth: []
+      responses:
+        200:
+          description: List of permissions retrieved successfully
+        403:
+          description: Unauthorized
+        401:
+          description: Unauthenticated
+
+  /groups:
+    get:
+      tags:
+        - Groups
+      summary: Get all groups
+      security:
+        - bearerAuth: []
+      responses:
+        200:
+          description: List of groups retrieved successfully
+        403:
+          description: Unauthorized
+        401:
+          description: Unauthenticated
